@@ -2,6 +2,10 @@ package org.example;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.w3c.dom.ls.LSOutput;
+
+import java.sql.SQLOutput;
+
 
 class FarToCelTest {
 
