@@ -27,4 +27,10 @@ class FarToCelTest {
         Assertions.assertEquals(100, FarToCel.kelvintoCel(373.15f), 0.01);
     }
 
+    // New test case for Kelvin to Fahrenheit conversion
+    @Test
+    void testKelvinToFahrenheit() {
+        Assertions.assertEquals(80.51, FarToCel.kelvinToFahrenheit(300.1f), 0.1 );
+    }
+
 }

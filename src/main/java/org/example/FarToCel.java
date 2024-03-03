@@ -12,4 +12,7 @@ public class FarToCel {
     public static float kelvintoCel(float kel){
         return (float) (kel-273.15);
     }
+
+    // New method for converting Kelvin to Fahrenheit
+    public static double kelvinToFahrenheit(float kelvin) {return (kelvin - 273.15) * 9.0 / 5 + 32;}
 }
