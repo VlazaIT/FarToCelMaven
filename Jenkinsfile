@@ -2,8 +2,6 @@ pipeline {
     agent any
 
     environment {
-        // Docker Hub credentials ID
-        DOCKERHUB_CREDENTIALS_ID = 'vladzak'
         // Docker Hub repository name
         DOCKERHUB_REPO = 'vladzak/fartocelkelvin'
         // Docker image tag
@@ -51,10 +49,10 @@ pipeline {
         stage('Push Docker Image to Docker Hub') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: DOCKERHUB_CREDENTIALS_ID, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                    withCredentials([usernamePassword(credentialsId: 'vladzak', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
                         bat "echo %DOCKER_PASSWORD% | docker login -u %DOCKER_USERNAME% --password-stdin"
+                        bat "docker push ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}"
                     }
-                    bat "docker push ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}"
                 }
             }
         }
