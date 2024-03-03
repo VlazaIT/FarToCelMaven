@@ -33,6 +33,7 @@
   </dependencies>
 
   <build>
+    <finalName>interconversions</finalName>
     <plugins>
 
       <plugin>
@@ -42,7 +43,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>org.example.FarToCel</mainClass>
+              <mainClass>org.example.App</mainClass>
             </manifest>
           </archive>
         </configuration>
