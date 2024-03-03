@@ -2,16 +2,16 @@ pipeline {
     agent any
 
     environment {
-            // Define Docker Hub credentials ID - replace 'your-docker-credentials-id' with the ID you've configured in Jenkins
-            DOCKERHUB_CREDENTIALS_ID = 'vladzak'
-            // Define Docker Hub repository name
-            DOCKERHUB_REPO = 'vladzak/fartocelkelvin'
-            // Define Docker image tag
-            DOCKER_IMAGE_TAG = 'latest'
+        // Docker Hub credentials ID
+        DOCKERHUB_CREDENTIALS_ID = 'vladzak'
+        // Docker Hub repository name
+        DOCKERHUB_REPO = 'vladzak/fartocelkelvin'
+        // Docker image tag
+        DOCKER_IMAGE_TAG = 'latest'
     }
 
     tools {
-        // Specify the version of Maven you have configured in Jenkins
+        // Maven version as configured in Jenkins
         maven 'Maven-3.9.6'
     }
 
@@ -24,21 +24,17 @@ pipeline {
 
         stage('Build') {
             steps {
-                // Use Maven to build the project
-                sh 'mvn clean install'
+                bat 'mvn clean install'
             }
         }
 
         stage('Test') {
             steps {
-                // Run Maven tests
-                sh 'mvn test'
+                bat 'mvn test'
             }
             post {
                 success {
-                    // Publish JUnit test results
                     junit '**/target/surefire-reports/TEST-*.xml'
-                    // Generate JaCoCo code coverage report
                     jacoco(execPattern: '**/target/jacoco.exec')
                 }
             }
@@ -47,8 +43,8 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Build Docker image using the Dockerfile in the project root
-                    docker.build("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}")
+                    // Assuming Docker is available in the PATH for the Jenkins agent
+                    bat "docker build -t ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} ."
                 }
             }
         }
@@ -56,10 +52,11 @@ pipeline {
         stage('Push Docker Image to Docker Hub') {
             steps {
                 script {
-                    // Log in to Docker Hub and push the Docker image
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS_ID) {
-                        docker.image("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}").push()
-                    }
+                    // Assuming you have the Docker Hub credentials set up in Jenkins
+                    // This step might require additional configuration to securely handle credentials
+                    bat "echo Logging into Docker Hub..."
+                    bat "docker login -u vladzak -p yourDockerHubPassword"
+                    bat "docker push ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}"
                 }
             }
         }
@@ -67,8 +64,8 @@ pipeline {
 
     post {
         always {
-            // Clean up Docker images to prevent disk space issues on Jenkins agent
-            sh "docker rmi \$(docker images -q ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}) --force"
+            bat "echo Cleaning up Docker images..."
+            bat "docker rmi ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} || echo Image not found"
         }
     }
 }
