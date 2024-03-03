@@ -43,7 +43,6 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Assuming Docker is available in the PATH for the Jenkins agent
                     bat "docker build -t ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} ."
                 }
             }
@@ -52,11 +51,9 @@ pipeline {
         stage('Push Docker Image to Docker Hub') {
             steps {
                 script {
-                    // Retrieve credentials from Jenkins and log in to Docker Hub securely
                     withCredentials([usernamePassword(credentialsId: DOCKERHUB_CREDENTIALS_ID, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
                         bat "echo %DOCKER_PASSWORD% | docker login -u %DOCKER_USERNAME% --password-stdin"
                     }
-                    // Push the Docker image
                     bat "docker push ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}"
                 }
             }
