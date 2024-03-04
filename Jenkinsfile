@@ -13,7 +13,7 @@
             stage('Checkout') {
                 steps {
                     // Checkout code from Git repository
-                    git branch:'main', 'https://github.com/VlazaIT/FarToCelMaven.git'
+                    git branch:'main', url:'https://github.com/VlazaIT/FarToCelMaven.git'
                 }
             }
             stage('Build Docker Image') {
