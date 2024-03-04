@@ -1,69 +1,36 @@
-pipeline {
-    agent any
+    pipeline {
+        agent any // IN THE LECTURE I WILL EXPLAIN THE SCRIPT AND THE WORKFLOW
 
-    environment {
-        // Docker Hub credentials ID
-        DOCKERHUB_CREDENTIALS_ID = 'vladzak'
-        // Docker Hub repository name
-        DOCKERHUB_REPO = 'vladzak/fartocelkelvin'
-        // Docker image tag
-        DOCKER_IMAGE_TAG = 'latest'
-    }
-
-    tools {
-        // Maven version as configured in Jenkins
-        maven 'Maven-3.9.6'
-    }
-
-    stages {
-        stage('Checkout') {
-            steps {
-                git branch: 'main', url: 'https://github.com/VlazaIT/FarToCelMaven'
-            }
+        environment {
+            // Define Docker Hub credentials ID
+            DOCKERHUB_CREDENTIALS_ID = 'vladzak'
+            // Define Docker Hub repository name
+            DOCKERHUB_REPO = 'vladzak/fartocelkelvin'
+            // Define Docker image tag
+            DOCKER_IMAGE_TAG = 'latest'
         }
-
-        stage('Build') {
-            steps {
-                bat 'mvn clean install'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                bat 'mvn test'
-            }
-            post {
-                success {
-                    junit '**/target/surefire-reports/TEST-*.xml'
-                    jacoco(execPattern: '**/target/jacoco.exec')
+        stages {
+            stage('Checkout') {
+                steps {
+                    // Checkout code from Git repository
+                    git 'https://github.com/VlazaIT/FarToCelMaven.git'
                 }
             }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    bat "docker build -t ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} ."
-                }
-            }
-        }
-
-        stage('Push Docker Image to Docker Hub') {
-            steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: DOCKERHUB_CREDENTIALS_ID, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                        bat "echo %DOCKER_PASSWORD% | docker login -u %DOCKER_USERNAME% --password-stdin"
-                        bat "docker push ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}"
+            stage('Build Docker Image') {
+                steps {
+                    // Build Docker image
+                    script {
+                        docker.build("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}")
                     }
                 }
             }
-        }
-    }
-
-    post {
-        always {
-            bat "echo Cleaning up Docker images..."
-            bat "docker rmi ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} || echo Image not found"
-        }
-    }
-}
+            stage('Push Docker Image to Docker Hub') {
+                steps {
+                    // Push Docker image to Docker Hub
+                    script {
+                        docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS_ID) {
+                            docker.image("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}").push()
+                        }
+                    }
+                }
+            }
